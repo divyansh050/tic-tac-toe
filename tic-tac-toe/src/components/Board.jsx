@@ -170,7 +170,7 @@ export const Board = () => {
         >
           Tic Tac Toe
         </Box>
-        <Box w="350px"  m="auto" style={{ ...center, justifyContent: "center" }}>
+        <Box w="350px"  m="1.3rem auto" style={{ ...center, justifyContent: "center" }}>
           <Box
             fontSize={"1rem"}
             fontWeight="500"
