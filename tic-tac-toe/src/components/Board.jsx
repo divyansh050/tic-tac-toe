@@ -17,7 +17,19 @@ const initialState = {
   xIsNext: true,
   winner: null,
   loading: false,
-  draw:null
+  draw: null,
+  totalGames: 0,
+  xWins: 0,
+  oWins: 0,
+  drawGames: 0,
+};
+
+const newGameState = {
+  squares: Array(9).fill(null),
+  xIsNext: true,
+  winner: null,
+  loading: false,
+  draw: null,
 };
 
 const reducer = (state, action) => {
@@ -46,13 +58,20 @@ const reducer = (state, action) => {
         ...state,
         loading: action.payload,
       };
-      case "draw":
+    case "draw":
       return {
         ...state,
         draw: true,
-      }
+      };
     case "reset":
-      return initialState;
+      return {
+        ...state,
+        ...newGameState,
+        totalGames: state.totalGames + 1,
+        xWins: state.xWins + (state.winner === "X" ? 1 : 0),
+        oWins: state.oWins + (state.winner === "O" ? 1 : 0),
+        drawGames: state.drawGames + (state.draw ? 1 : 0),
+      };
     default:
       throw new Error();
   }
@@ -77,12 +96,19 @@ const possibleWins = [
   [2, 4, 6],
 ];
 
-
-
 export const Board = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { squares, xIsNext, winner, loading ,draw } = state;
-
+  const {
+    squares,
+    xIsNext,
+    winner,
+    loading,
+    draw,
+    totalGames,
+    xWins,
+    oWins,
+    drawGames,
+  } = state;
 
   // css for center
   const center = {
@@ -128,73 +154,100 @@ export const Board = () => {
     });
 
   // checking for draw
-   !draw && 
-   (squares.every((square) => square !== null)) ? dispatch({ type: "draw" }) : null;
-  
+  !draw && squares.every((square) => square !== null)
+    ? dispatch({ type: "draw" })
+    : null;
 
   return (
-    <Box>
-      <Box fontSize={"2rem"} m="2">
-        {winner ? `Winner: ${winner}` : draw ? "Game Over" : `Next player: ${xIsNext ? "X" : "O"}`}
-      </Box>
-
-      {loading ? (
-        <Box h="18.5rem" w="18rem" m="auto" style={center}>
-          <Spinner
-            thickness="4px"
-            speed="0.65s"
-            emptyColor="gray.200"
-            color="blue.500"
-            size="xl"
-          />
-        </Box>
-      ) : winner || draw ? (
-        <Box h="18.5rem" w="18rem" m="auto" style={center}>
-          <Alert
-            status={winner ? "success" : "warning"}
-            variant="subtle"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            textAlign="center"
-            height="200px"
-          >
-            <AlertIcon boxSize="40px" mr={0} />
-            <AlertTitle mt={4} mb={1} fontSize="lg">
-              {winner ? "Winner Winner Chicken Dinner 🏆" : "Game Over!"}
-            </AlertTitle>
-            <AlertDescription maxWidth="sm">
-              {winner ? `Winner: ${winner}` : "Ohh no! It's a draw!"}
-            </AlertDescription>
-          </Alert>
-          ;
-        </Box>
-      ) : (
-        <Grid
-          w="295px"
-          m="auto"
-          templateColumns="repeat(3, 6rem)"
-          gap={1}
-          textAlign="center"
-          bg="green.800"
-        >
-          {" "}
-          {squares.map((value, index) => square(index, value))}
-        </Grid>
-      )}
-
+    <>
       <Box>
-        <Button
-          disabled={loading}
-          colorScheme="green"
-          onClick={newGame}
-          w="295px"
-          m="5"
+        <Box
+          fontSize={"3rem"}
+          m="2"
+          bg="green.500"
+          color="white"
+          borderRadius={"10px"}
         >
-          New Game
-        </Button>
+          Tic Tac Toe
+        </Box>
+        <Box w="350px"  m="auto" style={{ ...center, justifyContent: "center" }}>
+          <Box
+            fontSize={"1rem"}
+            fontWeight="500"
+            w="30%"
+            p="1"
+            style={{ textAlign: "left" }}
+          >
+            X Wins: {xWins}
+            <br />
+            {"       "} O Wins: {oWins}
+          </Box>
+          <Box fontSize={"2rem"} m="1" w="60%" style={{ textAlign: "left" }}>
+            {winner
+              ? `Winner: ${winner}`
+              : draw
+              ? "Game Over"
+              : `Next player: ${xIsNext ? "X" : "O"}`}
+          </Box>
+        </Box>
+
+        {loading ? (
+          <Box h="18.5rem" w="18rem" m="auto" style={center}>
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          </Box>
+        ) : winner || draw ? (
+          <Box h="18.5rem" w="18rem" m="auto" style={center}>
+            <Alert
+              status={winner ? "success" : "warning"}
+              variant="subtle"
+              flexDirection="column"
+              alignItems="center"
+              justifyContent="center"
+              textAlign="center"
+              height="200px"
+            >
+              <AlertIcon boxSize="40px" mr={0} />
+              <AlertTitle mt={4} mb={1} fontSize="lg">
+                {winner ? "Winner Winner Chicken Dinner 🏆" : "Game Over!"}
+              </AlertTitle>
+              <AlertDescription maxWidth="sm">
+                {winner ? `Winner: ${winner}` : "Ohh no! It's a draw!"}
+              </AlertDescription>
+            </Alert>
+          </Box>
+        ) : (
+          <Grid
+            w="295px"
+            m="auto"
+            templateColumns="repeat(3, 6rem)"
+            gap={1}
+            textAlign="center"
+            bg="green.800"
+          >
+            {" "}
+            {squares.map((value, index) => square(index, value))}
+          </Grid>
+        )}
+
+        <Box>
+          <Button
+            disabled={loading}
+            colorScheme="green"
+            onClick={newGame}
+            w="295px"
+            m="5"
+          >
+            New Game
+          </Button>
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 };
 
